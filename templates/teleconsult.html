@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}Téléconsultation{% endblock %}
+{% block extra_head %}
+<style>
+.video-layout{display:grid;grid-template-columns:1fr 320px;gap:0;background:var(--dark);border-radius:16px;overflow:hidden;min-height:500px}
+.video-main{padding:20px;display:flex;flex-direction:column;gap:14px}
+.video-box{background:linear-gradient(135deg,#132240,#0D2B55);border-radius:14px;flex:1;min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;border:2px solid rgba(0,151,167,.3)}
+.video-box .overlay{position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 30px,rgba(255,255,255,.02) 30px,rgba(255,255,255,.02) 31px);border-radius:14px}
+.controls{display:flex;gap:10px;justify-content:center}
+.ctrl-btn{width:52px;height:52px;border-radius:14px;border:1px solid rgba(255,255,255,.15);background:#1D3A5A;cursor:pointer;font-size:20px;transition:.15s}
+.ctrl-btn:hover{background:#243F6A}
+.ctrl-btn.active{background:var(--red)}
+.chat-panel{background:#0F1E35;display:flex;flex-direction:column;border-left:1px solid #1D3A5A}
+.chat-header{padding:14px 18px;border-bottom:1px solid #1D3A5A;color:#fff;font-weight:700;font-size:14px}
+.chat-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.chat-msg{padding:9px 14px;border-radius:12px;font-size:13px;max-width:85%;word-break:break-word}
+.chat-msg.from-me{background:var(--teal);color:#fff;align-self:flex-end;border-bottom-right-radius:3px}
+.chat-msg.from-other{background:#1D3A5A;color:#fff;align-self:flex-start;border-bottom-left-radius:3px}
+.chat-input-wrap{padding:10px 12px;border-top:1px solid #1D3A5A;display:flex;gap:8px}
+.chat-input{flex:1;background:#1D3A5A;border:none;border-radius:8px;padding:9px 12px;color:#fff;font-family:'Sora',sans-serif;font-size:13px;outline:none}
+.chat-input::placeholder{color:rgba(255,255,255,.35)}
+.send-btn{background:var(--teal);border:none;border-radius:8px;width:38px;cursor:pointer;color:#fff;font-size:16px}
+.timer-badge{background:rgba(0,151,167,.3);color:var(--teal);padding:4px 12px;border-radius:20px;font-size:13px;font-weight:700;font-family:'Sora',sans-serif;border:1px solid rgba(0,151,167,.4)}
+.notes-panel{background:#132240;border-radius:12px;padding:14px 16px;border:1px solid rgba(0,151,167,.25)}
+</style>
+{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+  <div>
+    <p class="page-title" style="margin-bottom:2px">📹 Téléconsultation</p>
+    <p style="color:var(--grey);font-size:14px">
+      {% if session.role=='patient' %}{{ consult.doc_name }} — {{ consult.specialite }}{% else %}{{ patient.name }} — {{ patient.age }} ans{% endif %}
+    </p>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center">
+    <span class="timer-badge">⏱ <span id="timer">00:00</span></span>
+    <span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#4CAF50;font-weight:600">
+      <span style="width:8px;height:8px;border-radius:50%;background:#4CAF50;box-shadow:0 0 8px #4CAF50;display:inline-block"></span>
+      En direct
+    </span>
+  </div>
+</div>
+
+<div class="video-layout">
+  <div class="video-main">
+    <!-- Grande vidéo -->
+    <div class="video-box">
+      <div class="overlay"></div>
+      <div style="position:relative;z-index:1;text-align:center">
+        <div class="avatar" style="background:var(--blue);width:80px;height:80px;font-size:26px;margin:0 auto 12px">
+          {% if session.role=='patient' %}{{ consult.doc_name[:2].upper() }}{% else %}{{ patient.name[:2].upper() }}{% endif %}
+        </div>
+        <p style="color:rgba(255,255,255,.7);font-size:14px">
+          {% if session.role=='patient' %}{{ consult.doc_name }}{% else %}{{ patient.name }}{% endif %}
+        </p>
+        <p style="color:rgba(255,255,255,.4);font-size:12px;margin-top:4px">Connexion vidéo HD sécurisée</p>
+      </div>
+      <div style="position:absolute;bottom:12px;left:14px">
+        <span class="badge" style="background:rgba(0,0,0,.4);color:rgba(255,255,255,.8);font-size:11px">🔒 Chiffré E2E</span>
+      </div>
+    </div>
+
+    <!-- Petite vidéo + contrôles -->
+    <div style="display:flex;align-items:center;gap:16px">
+      <div style="width:130px;height:88px;background:rgba(0,151,167,.15);border-radius:10px;border:2px solid rgba(0,151,167,.3);display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0">
+        <div class="avatar" style="background:var(--navy);width:40px;height:40px;font-size:14px">{{ session.name[:2].upper() }}</div>
+        <span style="position:absolute;bottom:4px;left:6px;color:rgba(255,255,255,.6);font-size:10px">Vous</span>
+      </div>
+      <div class="controls" style="flex:1">
+        <button class="ctrl-btn" id="muteBtn" onclick="toggleCtrl('muteBtn','🎙','🔇')" title="Micro">🎙</button>
+        <button class="ctrl-btn" id="camBtn" onclick="toggleCtrl('camBtn','📹','📷')" title="Caméra">📹</button>
+        <button class="ctrl-btn" title="Partager écran">🖥</button>
+        <button class="ctrl-btn" title="Chat" onclick="document.querySelector('.chat-input').focus()">💬</button>
+        {% if session.role=='doctor' %}
+        <button class="ctrl-btn" onclick="showOrdoPanel()" title="Ordonnance">📋</button>
+        {% endif %}
+        <button class="ctrl-btn active" onclick="endCall()" title="Raccrocher" style="background:#C62828;flex:0 0 auto;padding:0 18px;width:auto;color:#fff;font-size:14px;font-weight:700">
+          📵 Terminer
+        </button>
+      </div>
+    </div>
+
+    <!-- Notes médecin -->
+    {% if session.role == 'doctor' %}
+    <div class="notes-panel">
+      <p style="color:rgba(255,255,255,.7);font-size:12px;margin-bottom:8px;font-weight:600">📝 Notes de consultation</p>
+      <textarea id="consultNotes" placeholder="Saisissez vos notes…" style="width:100%;background:rgba(0,0,0,.3);border:1px solid rgba(0,151,167,.3);border-radius:8px;padding:10px;color:#fff;font-family:'Sora',sans-serif;font-size:13px;outline:none;resize:none;height:72px"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button onclick="saveNotes({{ consult.id }})" class="btn btn-primary btn-sm">💾 Sauvegarder</button>
+        <button onclick="finishConsult({{ consult.id }})" class="btn btn-sm" style="background:var(--green);color:#fff;border:none;border-radius:8px;padding:7px 14px;cursor:pointer;font-family:'Sora',sans-serif;font-weight:700;font-size:12px">✅ Terminer la consultation</button>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Infos patient (pour médecin) -->
+    {% if session.role == 'doctor' %}
+    <div class="notes-panel">
+      <p style="color:rgba(255,255,255,.7);font-size:12px;font-weight:600;margin-bottom:8px">👤 Patient : {{ patient.name }}</p>
+      <div style="display:flex;gap:20px;flex-wrap:wrap">
+        <span style="color:rgba(255,255,255,.6);font-size:12px">Âge: {{ patient.age or '—' }}</span>
+        <span style="color:rgba(255,255,255,.6);font-size:12px">Ville: {{ patient.city or '—' }}</span>
+        <span style="color:rgba(255,255,255,.6);font-size:12px">Motif: {{ consult.motif }}</span>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Chat -->
+  <div class="chat-panel">
+    <div class="chat-header">💬 Messagerie sécurisée</div>
+    <div class="chat-msgs" id="chatMsgs">
+      <div class="chat-msg from-other">👋 Consultation démarrée. Bienvenue !</div>
+    </div>
+    <div class="chat-input-wrap">
+      <input class="chat-input" id="chatInput" placeholder="Votre message…" onkeydown="if(event.key==='Enter') sendChat()"/>
+      <button class="send-btn" onclick="sendChat()">➤</button>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:14px;display:flex;gap:10px">
+  <a href="{{ url_for('consultations') }}" class="btn btn-outline btn-sm">← Retour aux consultations</a>
+</div>
+
+<script>
+// Timer
+let secs = 0;
+setInterval(()=>{
+  secs++;
+  const m = String(Math.floor(secs/60)).padStart(2,'0');
+  const s = String(secs%60).padStart(2,'0');
+  document.getElementById('timer').textContent = m+':'+s;
+}, 1000);
+
+// Contrôles
+function toggleCtrl(id, on, off) {
+  const b = document.getElementById(id);
+  if(b.textContent === on) { b.textContent = off; b.classList.add('active'); }
+  else { b.textContent = on; b.classList.remove('active'); }
+}
+
+// Chat
+const msgs = document.getElementById('chatMsgs');
+function sendChat() {
+  const inp = document.getElementById('chatInput');
+  if(!inp.value.trim()) return;
+  const d = document.createElement('div');
+  d.className = 'chat-msg from-me';
+  d.textContent = inp.value;
+  msgs.appendChild(d);
+  inp.value = '';
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// Notes
+function saveNotes(cid) {
+  const notes = document.getElementById('consultNotes').value;
+  fetch(`/api/consultation/${cid}/finish`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({notes, status:'planifiee'})
+  }).then(()=>{ const d=document.createElement('div'); d.className='chat-msg from-other'; d.textContent='✅ Notes sauvegardées.'; msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight; });
+}
+
+function finishConsult(cid) {
+  const notes = document.getElementById('consultNotes').value;
+  fetch(`/api/consultation/${cid}/finish`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({notes})
+  }).then(()=>{ window.location.href='{{ url_for("consultations") }}'; });
+}
+
+function endCall() {
+  if(confirm('Terminer la téléconsultation ?')) window.location.href='{{ url_for("consultations") }}';
+}
+</script>
+{% endblock %}

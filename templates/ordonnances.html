@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Ordonnances{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px">
+  <div>
+    <p class="page-title">💊 Ordonnances</p>
+    <p class="page-sub">{{ 'Vos prescriptions et leur statut de livraison.' if session.role=='patient' else 'Prescriptions émises pour vos patients.' }}</p>
+  </div>
+  {% if session.role=='doctor' %}
+  <a href="{{ url_for('new_ordonnance') }}" class="btn btn-primary">+ Nouvelle ordonnance</a>
+  {% endif %}
+</div>
+
+{% if ordonnances %}
+<div style="display:flex;flex-direction:column;gap:14px">
+  {% for o in ordonnances %}
+  <div class="card" style="display:flex;align-items:center;gap:18px">
+    <div style="font-size:40px">💊</div>
+    <div style="flex:1">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;flex-wrap:wrap">
+        <h3 style="font-size:16px;font-weight:800;color:var(--navy)">{{ o.medicament }}</h3>
+        <span class="s-{{ o.status }}"><span class="status-dot"></span>
+          {{ {'livre':'Livré','en_cours':'En cours','prepare':'Préparé','en_attente':'En attente','annule':'Annulé'}.get(o.status, o.status) }}
+        </span>
+      </div>
+      <p style="color:var(--grey);font-size:13px">
+        {{ o.posologie }}{% if o.duree %} · {{ o.duree }}{% endif %}
+        {% if session.role=='patient' %} · Prescrit par {{ o.doc_name }}{% else %} · Patient : {{ o.patient_name }}{% endif %}
+      </p>
+      <p style="color:var(--grey);font-size:11px;margin-top:3px">{{ o.created_at[:10] }}</p>
+
+      <!-- Suivi livraison si en cours -->
+      {% if o.status in ['en_cours','prepare'] and session.role=='patient' %}
+      <div style="margin-top:12px">
+        <div style="display:flex;align-items:center;gap:0">
+          {% set steps = [('Ordonnance reçue', o.status in ['prepare','en_cours','livre']),
+                          ('Pharmacie', o.status in ['prepare','en_cours','livre']),
+                          ('En livraison', o.status == 'en_cours'),
+                          ('Livré', o.status == 'livre')] %}
+          {% for step, done in steps %}
+          <div style="display:flex;align-items:center;{% if not loop.last %}flex:1{% endif %}">
+            <div style="text-align:center">
+              <div style="width:28px;height:28px;border-radius:50%;background:{% if done %}var(--teal){% else %}var(--lgrey){% endif %};color:{% if done %}#fff{% else %}var(--grey){% endif %};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 4px">
+                {% if done %}✓{% else %}{{ loop.index }}{% endif %}
+              </div>
+              <p style="font-size:10px;color:{% if done %}var(--teal){% else %}var(--grey){% endif %};white-space:nowrap">{{ step }}</p>
+            </div>
+            {% if not loop.last %}
+            <div style="flex:1;height:2px;background:{% if done %}var(--teal){% else %}var(--lgrey){% endif %};margin:0 4px 14px"></div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0">
+      {% if session.role=='doctor' and o.status=='en_attente' %}
+      <button onclick="updateOrdoStatus({{ o.id }},'livre')" class="btn btn-primary btn-sm">✓ Valider</button>
+      <button onclick="updateOrdoStatus({{ o.id }},'annule')" class="btn btn-sm btn-red">✕ Annuler</button>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card" style="text-align:center;padding:60px">
+  <span style="font-size:52px">💊</span>
+  <p style="color:var(--grey);margin-top:16px;font-size:15px">Aucune ordonnance pour le moment.</p>
+</div>
+{% endif %}
+
+<script>
+function updateOrdoStatus(id, status) {
+  fetch(`/api/ordonnance/${id}/status`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({status})
+  }).then(()=>location.reload());
+}
+</script>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Messages{% endblock %}
+{% block extra_head %}
+<style>
+.msg-layout{display:grid;grid-template-columns:280px 1fr;gap:0;background:var(--white);border-radius:16px;border:1px solid var(--lgrey);overflow:hidden;height:calc(100vh - 200px);min-height:500px}
+.contacts-panel{border-right:1.5px solid var(--lgrey);display:flex;flex-direction:column}
+.contacts-header{padding:16px 18px;border-bottom:1px solid var(--lgrey);font-weight:800;font-size:15px;color:var(--navy)}
+.contacts-list{flex:1;overflow-y:auto}
+.contact-item{padding:13px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:.15s;border-left:3px solid transparent}
+.contact-item:hover{background:var(--off)}
+.contact-item.active{background:var(--teal-lt);border-left-color:var(--teal)}
+.contact-name{font-weight:700;font-size:14px;color:var(--navy)}
+.contact-spec{font-size:11px;color:var(--grey);margin-top:2px}
+.chat-area{display:flex;flex-direction:column}
+.chat-header-bar{padding:14px 20px;border-bottom:1px solid var(--lgrey);display:flex;align-items:center;gap:14px}
+.chat-messages{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:12px;background:var(--off)}
+.msg-bubble{padding:10px 16px;border-radius:16px;max-width:65%;font-size:13px;line-height:1.5;word-break:break-word}
+.msg-bubble.me{background:var(--teal);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.msg-bubble.other{background:var(--white);color:var(--navy);align-self:flex-start;border-bottom-left-radius:4px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.msg-time{font-size:10px;opacity:.6;margin-top:3px}
+.chat-input-area{padding:14px 18px;border-top:1.5px solid var(--lgrey);display:flex;gap:10px;background:var(--white)}
+.chat-input{flex:1;background:var(--off);border:2px solid var(--lgrey);border-radius:12px;padding:11px 16px;font-family:'Sora',sans-serif;font-size:14px;outline:none;transition:border-color .15s;color:var(--navy)}
+.chat-input:focus{border-color:var(--teal)}
+.empty-chat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--grey)}
+</style>
+{% endblock %}
+{% block content %}
+<p class="page-title">💬 Messages</p>
+<p class="page-sub">Échangez en toute sécurité avec {% if session.role=='patient' %}vos médecins{% else %}vos patients{% endif %}.</p>
+
+<div class="msg-layout">
+  <!-- Contacts -->
+  <div class="contacts-panel">
+    <div class="contacts-header">Conversations</div>
+    <div class="contacts-list">
+      {% for c in contacts %}
+      <div class="contact-item" id="contact-{{ c.id }}" onclick="loadChat({{ c.id }}, '{{ c.name }}', '{{ c.avatar_color }}')">
+        <div class="avatar" style="background:{{ c.avatar_color }};width:40px;height:40px;font-size:14px;flex-shrink:0">{{ c.name[:2].upper() }}</div>
+        <div>
+          <div class="contact-name">{{ c.name }}</div>
+          {% if c.specialite %}<div class="contact-spec">{{ c.specialite }}</div>{% endif %}
+        </div>
+      </div>
+      {% else %}
+      <div style="padding:30px;text-align:center;color:var(--grey);font-size:13px">Aucun contact disponible.</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Zone chat -->
+  <div class="chat-area" id="chatArea">
+    <div class="empty-chat">
+      <span style="font-size:48px">💬</span>
+      <p style="font-size:15px;font-weight:600">Sélectionnez une conversation</p>
+      <p style="font-size:13px">Choisissez un contact dans la liste.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentToId = null;
+let pollInterval = null;
+
+async function loadChat(toId, name, color) {
+  currentToId = toId;
+  document.querySelectorAll('.contact-item').forEach(e => e.classList.remove('active'));
+  const el = document.getElementById('contact-'+toId);
+  if(el) el.classList.add('active');
+
+  document.getElementById('chatArea').innerHTML = `
+    <div class="chat-header-bar">
+      <div class="avatar" style="background:${color};width:40px;height:40px;font-size:14px">${name.substring(0,2).toUpperCase()}</div>
+      <div><p style="font-weight:800;color:var(--navy);font-size:15px">${name}</p><p style="color:var(--grey);font-size:12px">En ligne</p></div>
+    </div>
+    <div class="chat-messages" id="msgContainer"></div>
+    <div class="chat-input-area">
+      <input class="chat-input" id="msgInput" placeholder="Votre message…" onkeydown="if(event.key==='Enter') sendMsg()"/>
+      <button onclick="sendMsg()" class="btn btn-primary" style="border-radius:12px;padding:11px 20px">➤</button>
+    </div>
+  `;
+  await fetchMessages();
+  if(pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(fetchMessages, 3000);
+}
+
+async function fetchMessages() {
+  if(!currentToId) return;
+  const res = await fetch(`/api/messages/${currentToId}`);
+  const msgs = await res.json();
+  const container = document.getElementById('msgContainer');
+  if(!container) return;
+  const myId = {{ session.user_id }};
+  container.innerHTML = msgs.map(m => `
+    <div style="display:flex;flex-direction:column;align-items:${m.from_id==myId?'flex-end':'flex-start'}">
+      <div class="msg-bubble ${m.from_id==myId?'me':'other'}">
+        ${m.content}
+        <div class="msg-time">${m.created_at.substring(11,16)}</div>
+      </div>
+    </div>
+  `).join('') || '<div style="text-align:center;color:var(--grey);font-size:13px;padding:20px">Aucun message. Dites bonjour ! 👋</div>';
+  container.scrollTop = container.scrollHeight;
+}
+
+async function sendMsg() {
+  const inp = document.getElementById('msgInput');
+  const content = inp.value.trim();
+  if(!content || !currentToId) return;
+  inp.value = '';
+  await fetch('/api/messages', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({to_id: currentToId, content})
+  });
+  await fetchMessages();
+}
+</script>
+{% endblock %}

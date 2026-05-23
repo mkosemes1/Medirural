@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Mes constantes{% endblock %}
+{% block extra_head %}
+<style>
+.chart-bar{background:var(--teal);border-radius:4px 4px 0 0;transition:height .4s ease;position:absolute;bottom:0;width:28px;cursor:pointer}
+.chart-bar:hover{background:var(--blue);filter:brightness(1.1)}
+</style>
+{% endblock %}
+{% block content %}
+<p class="page-title">📊 Mes constantes vitales</p>
+<p class="page-sub">Suivez l'évolution de votre santé au quotidien.</p>
+
+<!-- Formulaire saisie -->
+<div class="card" style="margin-bottom:22px">
+  <h3 style="font-size:15px;font-weight:800;color:var(--navy);margin-bottom:18px">➕ Saisir de nouvelles mesures</h3>
+  <form method="POST">
+    <div class="card-grid card-grid-4">
+      <div class="form-group" style="margin-bottom:0">
+        <label>❤️ Tension (mmHg)</label>
+        <input type="text" name="tension" placeholder="ex: 125/80"/>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label>🩸 Glycémie (mmol/L)</label>
+        <input type="text" name="glycemie" placeholder="ex: 5.8"/>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label>⚖️ Poids (kg)</label>
+        <input type="number" name="poids" step="0.1" placeholder="ex: 70.5"/>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label>🌡️ Température (°C)</label>
+        <input type="number" name="temperature" step="0.1" placeholder="ex: 37.0"/>
+      </div>
+    </div>
+    <div class="form-group" style="max-width:200px;margin-top:14px;margin-bottom:0">
+      <label>💨 SpO2 (%)</label>
+      <input type="text" name="spo2" placeholder="ex: 98%"/>
+    </div>
+    <button type="submit" class="btn btn-primary" style="margin-top:16px">💾 Enregistrer</button>
+  </form>
+</div>
+
+{% if constantes %}
+<!-- Dernière mesure -->
+{% set last = constantes[0] %}
+<p style="font-weight:800;font-size:15px;color:var(--navy);margin-bottom:12px">📋 Dernière mesure — {{ last.recorded_at[:16] }}</p>
+<div class="card-grid card-grid-4" style="margin-bottom:22px">
+  {% for icon,label,val,unit,ok in [
+    ('❤️','Tension',     last.tension,                     'mmHg', true),
+    ('🩸','Glycémie',    last.glycemie,                    'mmol/L', true),
+    ('⚖️','Poids',       (last.poids|string if last.poids else '—'), 'kg', true),
+    ('🌡️','Température', (last.temperature|string if last.temperature else '—'), '°C', true)
+  ] %}
+  <div class="card" style="text-align:center;padding:18px 12px">
+    <div style="font-size:28px;margin-bottom:8px">{{ icon }}</div>
+    <p style="font-size:22px;font-weight:800;color:var(--navy)">{{ val or '—' }}</p>
+    <p style="color:var(--grey);font-size:11px;margin-top:2px">{{ label }}{% if val and val != '—' %} · {{ unit }}{% endif %}</p>
+    {% if val and val != '—' %}<span class="badge badge-green" style="margin-top:8px;display:inline-block">Normal</span>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Graphique poids -->
+<div class="card" style="margin-bottom:22px">
+  <h3 style="font-size:15px;font-weight:800;color:var(--navy);margin-bottom:18px">📈 Évolution du poids</h3>
+  {% set weights = constantes|selectattr('poids')|list %}
+  {% if weights %}
+  <div style="display:flex;align-items:flex-end;gap:10px;height:140px;position:relative;padding-bottom:24px">
+    {% set max_w = namespace(v=0) %}
+    {% for c in weights %}{% if c.poids and c.poids > max_w.v %}{% set max_w.v = c.poids %}{% endif %}{% endfor %}
+    {% for c in weights[-8:] %}
+    {% if c.poids %}
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
+      <span style="font-size:11px;color:var(--navy);font-weight:700">{{ c.poids }}kg</span>
+      <div style="width:100%;background:var(--lgrey);border-radius:6px;flex:1;position:relative;overflow:hidden">
+        <div style="position:absolute;bottom:0;left:0;right:0;background:var(--teal);border-radius:6px;height:{{ ((c.poids / max_w.v) * 100)|round }}%"></div>
+      </div>
+      <span style="font-size:9px;color:var(--grey)">{{ c.recorded_at[5:10] }}</span>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="color:var(--grey);text-align:center;padding:20px;font-size:14px">Enregistrez votre poids pour voir l'évolution.</p>
+  {% endif %}
+</div>
+
+<!-- Historique -->
+<div class="card">
+  <h3 style="font-size:15px;font-weight:800;color:var(--navy);margin-bottom:16px">🗃 Historique complet</h3>
+  <table>
+    <thead><tr><th>Date</th><th>Tension</th><th>Glycémie</th><th>Poids</th><th>Température</th><th>SpO2</th></tr></thead>
+    <tbody>
+    {% for c in constantes %}
+    <tr>
+      <td style="font-size:12px;color:var(--grey)">{{ c.recorded_at[:16] }}</td>
+      <td>{{ c.tension or '—' }}</td>
+      <td>{{ c.glycemie or '—' }}</td>
+      <td>{{ c.poids|string + ' kg' if c.poids else '—' }}</td>
+      <td>{{ c.temperature|string + ' °C' if c.temperature else '—' }}</td>
+      <td>{{ c.spo2 or '—' }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card" style="text-align:center;padding:60px">
+  <span style="font-size:52px">📊</span>
+  <p style="color:var(--grey);margin-top:16px;font-size:15px">Aucune constante enregistrée.</p>
+  <p style="color:var(--grey);font-size:13px;margin-top:6px">Utilisez le formulaire ci-dessus pour commencer.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title %}Assistant IA{% endblock %}
+{% block extra_head %}
+<style>
+.ia-layout{display:grid;grid-template-columns:1fr 280px;gap:20px}
+.chat-box{background:var(--white);border-radius:16px;border:1px solid var(--lgrey);display:flex;flex-direction:column;height:calc(100vh - 210px);min-height:500px;overflow:hidden}
+.chat-header-ia{background:linear-gradient(135deg,var(--navy),var(--blue));padding:16px 20px;display:flex;align-items:center;gap:14px}
+.bot-avatar{width:46px;height:46px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 0 20px rgba(0,151,167,.4)}
+.chat-messages-ia{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px;background:var(--off)}
+.bubble{padding:12px 16px;border-radius:18px;max-width:80%;font-size:13.5px;line-height:1.6;word-break:break-word}
+.bubble.user{background:var(--teal);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.bubble.bot{background:var(--white);color:var(--navy);align-self:flex-start;border-bottom-left-radius:4px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.bubble.bot.typing{background:var(--white);padding:14px 18px}
+.typing-dots{display:flex;gap:5px;align-items:center}
+.typing-dots span{width:8px;height:8px;border-radius:50%;background:var(--teal);animation:dot-bounce 1.2s ease-in-out infinite}
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes dot-bounce{0%,80%,100%{transform:scale(0.6);opacity:.5}40%{transform:scale(1);opacity:1}}
+.suggestions-wrap{padding:10px 16px 6px;border-top:1px solid var(--lgrey);background:var(--white);display:flex;gap:7px;flex-wrap:wrap}
+.suggestion{background:var(--teal-lt);border:1px solid rgba(0,151,167,.25);border-radius:20px;padding:5px 13px;font-size:12px;color:var(--teal);cursor:pointer;font-family:'Sora',sans-serif;font-weight:600;transition:.15s}
+.suggestion:hover{background:var(--teal);color:#fff}
+.input-area{padding:12px 16px 16px;background:var(--white);display:flex;gap:10px}
+.ia-input{flex:1;background:var(--off);border:2px solid var(--lgrey);border-radius:12px;padding:11px 16px;font-family:'Sora',sans-serif;font-size:14px;outline:none;transition:border-color .15s;color:var(--navy)}
+.ia-input:focus{border-color:var(--teal)}
+.send-btn-ia{background:var(--teal);border:none;border-radius:12px;padding:11px 20px;cursor:pointer;color:#fff;font-size:18px;transition:.15s}
+.send-btn-ia:hover{background:#00838F}
+.send-btn-ia:disabled{background:var(--lgrey);cursor:default}
+.info-card{background:var(--white);border-radius:14px;border:1px solid var(--lgrey);padding:18px 20px;margin-bottom:14px}
+.info-card h4{font-size:13px;font-weight:800;color:var(--navy);margin-bottom:10px}
+.info-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--lgrey);font-size:12px}
+.info-row:last-child{border:none}
+.info-row .k{color:var(--grey)}
+.info-row .v{font-weight:600;color:var(--navy)}
+</style>
+{% endblock %}
+{% block content %}
+<p class="page-title">🤖 Assistant IA MediBot</p>
+<p class="page-sub">Décrivez vos symptômes. MediBot vous oriente et vous conseille 24h/24.</p>
+
+<div class="ia-layout">
+  <!-- Chat principal -->
+  <div class="chat-box">
+    <div class="chat-header-ia">
+      <div class="bot-avatar">🤖</div>
+      <div>
+        <p style="color:#fff;font-weight:800;font-size:16px">MediBot</p>
+        <p style="color:rgba(255,255,255,.65);font-size:12px">Assistant IA · Disponible 24h/24 · 7j/7</p>
+      </div>
+      <div style="margin-left:auto">
+        <span class="badge" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.2)">🟢 En ligne</span>
+      </div>
+    </div>
+
+    <div class="chat-messages-ia" id="chatMsgs">
+      <div style="display:flex;gap:10px;align-items:flex-end">
+        <div class="bot-avatar" style="width:32px;height:32px;font-size:16px">🤖</div>
+        <div class="bubble bot">
+          Bonjour <strong>{{ session.name.split()[0] }}</strong> ! 👋<br/>
+          Je suis <strong>MediBot</strong>, votre assistant santé MediRural.<br/>
+          Décrivez vos symptômes ou posez-moi une question médicale. Je vous aiderai à comprendre et à trouver le bon spécialiste.
+        </div>
+      </div>
+    </div>
+
+    <div class="suggestions-wrap">
+      <button class="suggestion" onclick="sendSuggestion(this)">🤒 J'ai de la fièvre</button>
+      <button class="suggestion" onclick="sendSuggestion(this)">😮‍💨 Je suis essoufflé(e)</button>
+      <button class="suggestion" onclick="sendSuggestion(this)">💊 Renouveler mon ordonnance</button>
+      <button class="suggestion" onclick="sendSuggestion(this)">🩺 Quel médecin consulter ?</button>
+      <button class="suggestion" onclick="sendSuggestion(this)">💉 Glycémie élevée</button>
+    </div>
+
+    <div class="input-area">
+      <input class="ia-input" id="iaInput" placeholder="Décrivez vos symptômes ou posez une question…" onkeydown="if(event.key==='Enter' && !event.shiftKey) sendMsg()"/>
+      <button class="send-btn-ia" id="sendBtn" onclick="sendMsg()">➤</button>
+    </div>
+  </div>
+
+  <!-- Panneau info -->
+  <div>
+    <div class="info-card">
+      <h4>👤 Votre profil santé</h4>
+      <div class="info-row"><span class="k">Nom</span><span class="v">{{ session.name }}</span></div>
+      <div class="info-row"><span class="k">Rôle</span><span class="v">{{ 'Patient' if session.role=='patient' else 'Médecin' }}</span></div>
+    </div>
+
+    <div class="info-card">
+      <h4>⚠️ Avertissement</h4>
+      <p style="color:var(--grey);font-size:12px;line-height:1.6">MediBot est un assistant d'orientation. Il <strong>ne remplace pas</strong> un médecin. En cas d'urgence appelez le <strong style="color:var(--red)">15 (SAMU)</strong>.</p>
+    </div>
+
+    <div class="info-card">
+      <h4>📞 Urgences</h4>
+      <div class="info-row"><span class="k">SAMU</span><span class="v" style="color:var(--red)">15</span></div>
+      <div class="info-row"><span class="k">Pompiers</span><span class="v" style="color:var(--red)">18</span></div>
+      <div class="info-row"><span class="k">Médecin de garde</span><span class="v">3966</span></div>
+      <div class="info-row"><span class="k">Urgences EU</span><span class="v">112</span></div>
+    </div>
+
+    <div class="info-card">
+      <h4>🩺 Consulter maintenant</h4>
+      <p style="color:var(--grey);font-size:12px;margin-bottom:12px">MediBot vous conseille de consulter ?</p>
+      <a href="{{ url_for('doctors') }}" class="btn btn-primary btn-sm" style="width:100%;justify-content:center;display:flex">Trouver un médecin →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const msgs   = document.getElementById('chatMsgs');
+const input  = document.getElementById('iaInput');
+const sendBtn= document.getElementById('sendBtn');
+const history= [];
+
+function appendMsg(text, role) {
+  const wrap = document.createElement('div');
+  wrap.style.cssText = `display:flex;gap:10px;align-items:flex-end;justify-content:${role==='user'?'flex-end':'flex-start'}`;
+  if(role === 'assistant') {
+    const av = document.createElement('div');
+    av.className = 'bot-avatar';
+    av.style.cssText = 'width:32px;height:32px;font-size:16px;flex-shrink:0';
+    av.textContent = '🤖';
+    wrap.appendChild(av);
+  }
+  const bubble = document.createElement('div');
+  bubble.className = `bubble ${role==='user'?'user':'bot'}`;
+  bubble.innerHTML = text.replace(/\n/g,'<br/>');
+  wrap.appendChild(bubble);
+  if(role === 'user') {
+    const av = document.createElement('div');
+    av.className = 'avatar';
+    av.style.cssText = `background:{{ session.avatar_color }};width:32px;height:32px;font-size:12px;flex-shrink:0`;
+    av.textContent = '{{ session.name[:2].upper() }}';
+    wrap.appendChild(av);
+  }
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+  return bubble;
+}
+
+function showTyping() {
+  const wrap = document.createElement('div');
+  wrap.id = 'typingWrap';
+  wrap.style.cssText = 'display:flex;gap:10px;align-items:flex-end';
+  wrap.innerHTML = `
+    <div class="bot-avatar" style="width:32px;height:32px;font-size:16px;flex-shrink:0">🤖</div>
+    <div class="bubble bot typing"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function hideTyping() {
+  const t = document.getElementById('typingWrap');
+  if(t) t.remove();
+}
+
+async function sendMsg() {
+  const text = input.value.trim();
+  if(!text || sendBtn.disabled) return;
+  input.value = '';
+  sendBtn.disabled = true;
+
+  appendMsg(text, 'user');
+  history.push({role:'user', content: text});
+  showTyping();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `Tu es MediBot, l'assistant IA de MediRural, une plateforme de santé numérique pour les déserts médicaux.
+Tu parles à ${{'{{ session.name }}'}} qui est un(e) ${'{{ "patient" if session.role=="patient" else "médecin" }}'}.
+Ton rôle : écouter les symptômes, rassurer, orienter vers le bon spécialiste et conseiller.
+Réponds en français, de façon bienveillante et claire. 2-4 phrases maximum par réponse.
+Ne fais jamais de diagnostic définitif. Si urgence détectée, indique d'appeler le 15.
+Si le patient a besoin d'un médecin, propose-lui de consulter sur MediRural.`,
+        messages: history
+      })
+    });
+
+    const data = await res.json();
+    hideTyping();
+
+    if(data.error) {
+      appendMsg("⚠️ Désolé, une erreur est survenue. Veuillez réessayer.", 'assistant');
+    } else {
+      const reply = data.content[0].text;
+      history.push({role:'assistant', content: reply});
+      appendMsg(reply, 'assistant');
+    }
+  } catch(e) {
+    hideTyping();
+    appendMsg("⚠️ Connexion impossible. Vérifiez votre connexion internet.", 'assistant');
+  }
+  sendBtn.disabled = false;
+  input.focus();
+}
+
+function sendSuggestion(btn) {
+  input.value = btn.textContent.replace(/^[^\w]+/, '').trim();
+  sendMsg();
+}
+</script>
+{% endblock %}

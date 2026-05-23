@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Médecins{% endblock %}
+{% block content %}
+<p class="page-title">🩺 Trouver un médecin</p>
+<p class="page-sub">Consultez un spécialiste disponible dès maintenant, en vidéo.</p>
+
+<!-- Filtres -->
+<div class="card" style="margin-bottom:22px;padding:18px 22px">
+  <form method="GET" style="display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap">
+    <div style="flex:1;min-width:200px">
+      <label style="font-size:12px;font-weight:600;color:var(--grey);display:block;margin-bottom:6px">RECHERCHE</label>
+      <input name="q" value="{{ search }}" placeholder="Nom du médecin…" style="width:100%;padding:10px 14px;border:2px solid var(--lgrey);border-radius:10px;font-family:'Sora',sans-serif;font-size:14px;outline:none"/>
+    </div>
+    <div style="min-width:180px">
+      <label style="font-size:12px;font-weight:600;color:var(--grey);display:block;margin-bottom:6px">SPÉCIALITÉ</label>
+      <select name="spec" style="width:100%;padding:10px 14px;border:2px solid var(--lgrey);border-radius:10px;font-family:'Sora',sans-serif;font-size:14px;outline:none">
+        <option value="">Toutes les spécialités</option>
+        {% for s in specs %}<option value="{{ s.specialite }}" {% if s.specialite==spec %}selected{% endif %}>{{ s.specialite }}</option>{% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">🔍 Rechercher</button>
+    {% if search or spec %}<a href="{{ url_for('doctors') }}" class="btn btn-outline">Réinitialiser</a>{% endif %}
+  </form>
+</div>
+
+<!-- Liste médecins -->
+{% if doctors %}
+<div style="display:flex;flex-direction:column;gap:16px">
+  {% for d in doctors %}
+  <div class="card" style="display:flex;align-items:center;gap:20px">
+    <div class="avatar" style="background:{{ d.avatar_color }};width:62px;height:62px;font-size:20px;flex-shrink:0">
+      {{ d.name[:2].upper() }}
+    </div>
+    <div style="flex:1">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;flex-wrap:wrap">
+        <h3 style="font-size:17px;font-weight:800;color:var(--navy)">{{ d.name }}</h3>
+        <span class="badge">{{ d.specialite }}</span>
+        <span class="badge badge-green">{{ d.dispo }}</span>
+      </div>
+      <p style="color:var(--grey);font-size:13px">{{ d.city }} · ⭐ {{ d.note }} / 5 · {{ d.nb_consults }} consultations · {{ d.tarif }}€/consultation</p>
+      {% if d.bio %}<p style="color:var(--grey);font-size:12px;margin-top:5px;font-style:italic">{{ d.bio[:120] }}…</p>{% endif %}
+    </div>
+    <div style="display:flex;gap:8px;flex-shrink:0">
+      <a href="{{ url_for('doctor_detail', doc_id=d.id) }}" class="btn btn-outline btn-sm">Profil</a>
+      <a href="{{ url_for('book', doc_id=d.id) }}" class="btn btn-primary btn-sm">📅 Prendre RDV</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card" style="text-align:center;padding:50px">
+  <span style="font-size:48px">🔍</span>
+  <p style="color:var(--grey);margin-top:14px">Aucun médecin trouvé pour cette recherche.</p>
+  <a href="{{ url_for('doctors') }}" class="btn btn-outline" style="margin-top:14px">Voir tous les médecins</a>
+</div>
+{% endif %}
+{% endblock %}

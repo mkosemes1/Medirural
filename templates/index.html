@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>MediRural — La santé partout, pour tous</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0D2B55;--teal:#0097A7;--blue:#1565C0;--gold:#F9A825;--white:#fff;--off:#F4F8FB}
+body{font-family:'Sora',sans-serif;background:var(--white);color:var(--navy);overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+
+/* NAV */
+nav{position:fixed;top:0;width:100%;z-index:100;padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid #ECEFF1;box-shadow:0 1px 12px rgba(13,43,85,.06)}
+.logo{font-family:'Fraunces',serif;font-size:26px;display:flex;align-items:center;gap:10px}
+.logo-icon{width:40px;height:40px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px}
+.nav-actions{display:flex;gap:10px}
+.btn{padding:10px 24px;border-radius:10px;font-family:'Sora',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:.2s;border:2px solid transparent;display:inline-flex;align-items:center;gap:6px}
+.btn-outline{border-color:var(--teal);color:var(--teal);background:transparent}
+.btn-outline:hover{background:var(--teal);color:#fff}
+.btn-primary{background:var(--teal);color:#fff}
+.btn-primary:hover{background:#00838F}
+.btn-lg{padding:14px 34px;font-size:16px;border-radius:12px}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;background:linear-gradient(135deg,var(--navy) 0%,#0D4F7A 55%,#0097A7 100%);position:relative;overflow:hidden;padding:0 40px}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='1.5' fill='%23ffffff08'/%3E%3C/svg%3E");background-size:60px 60px}
+.hero-content{position:relative;z-index:2;max-width:680px}
+.hero-tag{display:inline-flex;gap:8px;margin-bottom:24px}
+.tag{background:rgba(255,255,255,.15);color:#fff;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(8px)}
+.hero h1{font-family:'Fraunces',serif;font-size:clamp(40px,5vw,68px);color:#fff;line-height:1.1;margin-bottom:20px}
+.hero h1 em{color:var(--gold);font-style:normal}
+.hero p{color:rgba(255,255,255,.75);font-size:18px;line-height:1.6;margin-bottom:36px;max-width:520px}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap}
+.hero-stats{position:absolute;right:80px;bottom:60px;display:flex;gap:20px}
+.hstat{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:18px 24px;text-align:center;backdrop-filter:blur(8px)}
+.hstat .n{font-size:28px;font-weight:800;color:#fff}
+.hstat .l{font-size:11px;color:rgba(255,255,255,.7);margin-top:3px}
+
+/* FEATURES */
+.section{padding:90px 40px;max-width:1200px;margin:0 auto}
+.section-tag{display:inline-block;background:#E0F7FA;color:var(--teal);padding:5px 16px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.5px;margin-bottom:14px}
+.section h2{font-family:'Fraunces',serif;font-size:clamp(28px,3.5vw,46px);color:var(--navy);margin-bottom:12px;line-height:1.2}
+.section .sub{color:#546E7A;font-size:16px;margin-bottom:50px;max-width:560px}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.feat{background:var(--off);border-radius:18px;padding:32px;border:1px solid #ECEFF1;transition:.2s}
+.feat:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(13,43,85,.12);background:#fff}
+.feat-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:18px}
+.feat h3{font-size:17px;font-weight:700;margin-bottom:8px;color:var(--navy)}
+.feat p{color:#546E7A;font-size:14px;line-height:1.6}
+
+/* HOW IT WORKS */
+.how{background:linear-gradient(135deg,#F4F8FB,#E0F7FA);padding:80px 40px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:1100px;margin:0 auto;margin-top:40px}
+.step{text-align:center;padding:24px}
+.step-num{width:52px;height:52px;border-radius:50%;background:var(--teal);color:#fff;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.step h4{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.step p{color:#546E7A;font-size:13px;line-height:1.5}
+
+/* ROLES */
+.roles{padding:80px 40px;max-width:1100px;margin:0 auto}
+.roles-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:40px}
+.role-card{border-radius:22px;padding:40px;color:#fff;position:relative;overflow:hidden}
+.role-card::before{content:'';position:absolute;right:-30px;top:-30px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.08)}
+.role-patient{background:linear-gradient(135deg,var(--teal),var(--blue))}
+.role-doctor{background:linear-gradient(135deg,var(--navy),#1D6FA4)}
+.role-card h3{font-size:26px;font-weight:800;margin-bottom:12px;position:relative}
+.role-card p{opacity:.85;line-height:1.6;margin-bottom:24px;position:relative;font-size:15px}
+.role-features{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:28px;position:relative}
+.role-features li{font-size:14px;opacity:.9}
+.role-features li::before{content:'✓  ';font-weight:700}
+
+/* TESTIMONIALS */
+.testimonials{background:var(--navy);padding:80px 40px;text-align:center}
+.testimonials h2{font-family:'Fraunces',serif;font-size:36px;color:#fff;margin-bottom:8px}
+.testimonials .sub{color:rgba(255,255,255,.6);margin-bottom:48px}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1000px;margin:0 auto}
+.testi{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:28px;text-align:left}
+.testi p{color:rgba(255,255,255,.85);font-size:14px;line-height:1.6;margin-bottom:18px;font-style:italic}
+.testi-author{display:flex;align-items:center;gap:10px}
+.testi-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff}
+.testi-name{color:#fff;font-weight:600;font-size:13px}
+.testi-role{color:rgba(255,255,255,.5);font-size:11px}
+
+/* CTA */
+.cta-section{padding:80px 40px;text-align:center}
+.cta-section h2{font-family:'Fraunces',serif;font-size:40px;color:var(--navy);margin-bottom:14px}
+.cta-section p{color:#546E7A;font-size:17px;margin-bottom:36px}
+.cta-btns{display:flex;gap:14px;justify-content:center}
+
+/* FOOTER */
+footer{background:var(--navy);color:rgba(255,255,255,.6);padding:40px;text-align:center;font-size:13px}
+footer strong{color:#fff}
+
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.float{animation:float 4s ease-in-out infinite}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><div class="logo-icon">🏥</div> MediRural</div>
+  <div class="nav-actions">
+    <a href="/login"    class="btn btn-outline">Se connecter</a>
+    <a href="/register" class="btn btn-primary">Commencer gratuitement</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-tag">
+      <span class="tag">🏥 Santé numérique</span>
+      <span class="tag">🤖 IA médicale</span>
+      <span class="tag">🚚 Livraison d'ordonnances</span>
+    </div>
+    <h1>La santé <em>rurale</em><br/>réinventée.</h1>
+    <p>Téléconsultez un médecin en moins de 15 minutes, recevez vos médicaments à domicile et bénéficiez d'un suivi personnalisé par IA — où que vous soyez.</p>
+    <div class="hero-actions">
+      <a href="/register" class="btn btn-primary btn-lg">✨ Créer un compte gratuit</a>
+      <a href="/login"    class="btn btn-lg" style="background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.3)">Se connecter →</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="hstat float" style="animation-delay:.2s"><div class="n">6M</div><div class="l">Français sans médecin</div></div>
+    <div class="hstat float" style="animation-delay:.4s"><div class="n">&lt; 15 min</div><div class="l">Délai consultation</div></div>
+    <div class="hstat float" style="animation-delay:.6s"><div class="n">24h/24</div><div class="l">Disponibilité</div></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section">
+  <span class="section-tag">FONCTIONNALITÉS</span>
+  <h2>Tout ce dont vous avez besoin,<br/>dans une seule plateforme</h2>
+  <p class="sub">MediRural réunit téléconsultation, livraison et intelligence artificielle pour un parcours de soin sans friction.</p>
+  <div class="features-grid">
+    <div class="feat">
+      <div class="feat-icon" style="background:#E0F7FA">📹</div>
+      <h3>Téléconsultation HD</h3>
+      <p>Vidéo chiffrée de bout en bout, ordonnance électronique signée, disponible 7j/7 avec des médecins certifiés.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon" style="background:#E8F5E9">🚚</div>
+      <h3>Livraison d'ordonnances</h3>
+      <p>Pharmacies partenaires, livraison à domicile sous 24h, suivi en temps réel de votre commande.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon" style="background:#E3F2FD">🤖</div>
+      <h3>Assistant IA MediBot</h3>
+      <p>Pré-analyse de vos symptômes, orientation vers le bon spécialiste et rappels de prise de médicaments.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon" style="background:#FFF8E1">📊</div>
+      <h3>Suivi des constantes</h3>
+      <p>Enregistrez tension, glycémie et poids. Courbes d'évolution visibles par vous et votre médecin.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon" style="background:#FCE4EC">💬</div>
+      <h3>Messagerie sécurisée</h3>
+      <p>Échangez directement avec votre médecin entre les consultations, en toute confidentialité.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon" style="background:#F3E5F5">📋</div>
+      <h3>Dossier médical partagé</h3>
+      <p>Historique complet, ordonnances, résultats d'analyses — accessible par tous vos médecins avec votre accord.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<div class="how">
+  <div style="max-width:1100px;margin:0 auto">
+    <span class="section-tag">COMMENT ÇA MARCHE</span>
+    <h2 style="font-family:'Fraunces',serif;font-size:36px;color:var(--navy);margin-top:10px">En 4 étapes simples</h2>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h4>Créez votre compte</h4>
+      <p>Inscription gratuite en 2 minutes, sans carte bancaire requise.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h4>Choisissez un médecin</h4>
+      <p>Filtrez par spécialité, disponibilité et avis patients.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h4>Consultez en vidéo</h4>
+      <p>Connexion directe, ordonnance électronique en fin de séance.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <h4>Recevez vos médicaments</h4>
+      <p>Livraison à domicile depuis une pharmacie partenaire sous 24h.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ROLES -->
+<div class="roles">
+  <span class="section-tag">POUR TOUS</span>
+  <h2 style="font-family:'Fraunces',serif;font-size:36px;color:var(--navy);margin-top:10px;margin-bottom:6px">Une plateforme pour patients<br/>et médecins</h2>
+  <div class="roles-grid">
+    <div class="role-card role-patient">
+      <h3>👤 Patients</h3>
+      <p>Accédez aux meilleurs médecins sans vous déplacer, de chez vous, à n'importe quelle heure.</p>
+      <ul class="role-features">
+        <li>Consultation vidéo en moins de 15 min</li>
+        <li>Livraison médicaments à domicile</li>
+        <li>Suivi IA de votre santé au quotidien</li>
+        <li>Carnet de santé numérique sécurisé</li>
+        <li>Rappels de médicaments intelligents</li>
+      </ul>
+      <a href="/register?role=patient" class="btn" style="background:#fff;color:var(--teal)">Commencer →</a>
+    </div>
+    <div class="role-card role-doctor">
+      <h3>🩺 Médecins</h3>
+      <p>Étendez votre pratique au-delà de votre cabinet, aidez plus de patients et gérez votre agenda facilement.</p>
+      <ul class="role-features">
+        <li>Tableau de bord patient enrichi par IA</li>
+        <li>Prescription électronique certifiée</li>
+        <li>Messagerie sécurisée avec patients</li>
+        <li>Statistiques et suivi de vos patients</li>
+        <li>Rémunération directe via feuille de soin</li>
+      </ul>
+      <a href="/register?role=doctor" class="btn" style="background:#fff;color:var(--navy)">Rejoindre →</a>
+    </div>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<div class="testimonials">
+  <h2>Ce que disent nos utilisateurs</h2>
+  <p class="sub">Des milliers de patients et de médecins nous font confiance chaque jour.</p>
+  <div class="testi-grid">
+    <div class="testi">
+      <p>"Habituellement je devais faire 45 minutes de route pour voir un médecin. Avec MediRural, j'ai eu un rendez-vous en 10 minutes depuis mon salon."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:#0097A7">MD</div>
+        <div><div class="testi-name">Marie D.</div><div class="testi-role">Patiente · Aurillac (15)</div></div>
+      </div>
+    </div>
+    <div class="testi">
+      <p>"La plateforme m'a permis de suivre mes patients ruraux entre les consultations. Le tableau de bord IA est vraiment utile pour détecter les anomalies tôt."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:#1565C0">AK</div>
+        <div><div class="testi-name">Dr. Amina K.</div><div class="testi-role">Médecin généraliste</div></div>
+      </div>
+    </div>
+    <div class="testi">
+      <p>"Mes médicaments livrés à la maison, c'est un confort inestimable quand on a du mal à se déplacer. La qualité du service est vraiment au rendez-vous."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:#2E7D32">JM</div>
+        <div><div class="testi-name">Jean M.</div><div class="testi-role">Patient · Aurillac (15)</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Prêt à transformer votre accès à la santé ?</h2>
+  <p>Rejoignez MediRural aujourd'hui — c'est gratuit pour commencer.</p>
+  <div class="cta-btns">
+    <a href="/register" class="btn btn-primary btn-lg">✨ Créer mon compte gratuit</a>
+    <a href="/login"    class="btn btn-outline btn-lg">Se connecter</a>
+  </div>
+</section>
+
+<footer>
+  <p><strong>MediRural</strong> — La santé sans frontières · contact@medirural.fr</p>
+  <p style="margin-top:8px">© 2025 MediRural SAS · <a href="#" style="color:rgba(255,255,255,.5)">Mentions légales</a> · <a href="#" style="color:rgba(255,255,255,.5)">Politique de confidentialité</a></p>
+</footer>
+</body>
+</html>

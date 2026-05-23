@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Mes consultations{% endblock %}
+{% block content %}
+<p class="page-title">📅 {{ 'Mes consultations' if session.role=='patient' else 'Consultations patients' }}</p>
+<div class="card">
+  {% if consultations %}
+  <table>
+    <thead><tr>
+      <th>{{ 'Médecin' if session.role=='patient' else 'Patient' }}</th>
+      <th>Motif</th>
+      <th>Date</th>
+      <th>Statut</th>
+      <th>Action</th>
+    </tr></thead>
+    <tbody>
+    {% for c in consultations %}
+    <tr>
+      <td><strong>{{ c.doc_name if session.role=='patient' else c.patient_name }}</strong><br>
+          <small style="color:var(--grey)">{{ c.specialite if session.role=='patient' else (c.patient_age|string + ' ans — ' + c.patient_city if c.patient_age else '') }}</small></td>
+      <td style="font-size:13px">{{ c.motif }}</td>
+      <td style="font-size:12px;color:var(--grey)">{{ c.date_rdv or '—' }}</td>
+      <td><span class="s-{{ c.status }}"><span class="status-dot"></span>{{ c.status|replace('_',' ')|title }}</span></td>
+      <td>
+        {% if c.status == 'planifiee' %}
+        <a href="{{ url_for('teleconsult', consult_id=c.id) }}" class="btn btn-primary btn-sm">📹 Rejoindre</a>
+        {% elif c.status == 'terminee' and c.notes %}
+        <button onclick="showNotes('{{ c.notes|replace("'","\\'") }}')" class="btn btn-outline btn-sm">📋 Notes</button>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div style="text-align:center;padding:50px">
+    <span style="font-size:48px">📅</span>
+    <p style="color:var(--grey);margin-top:14px;font-size:14px">Aucune consultation pour le moment.</p>
+    {% if session.role=='patient' %}
+    <a href="{{ url_for('doctors') }}" class="btn btn-primary" style="margin-top:14px">Prendre un rendez-vous</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<!-- Modal notes -->
+<div id="notesModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center">
+  <div class="card" style="max-width:480px;width:90%">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="font-size:16px;font-weight:800;color:var(--navy)">📋 Notes de consultation</h3>
+      <button onclick="document.getElementById('notesModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer">✕</button>
+    </div>
+    <p id="notesText" style="color:var(--grey);font-size:14px;line-height:1.6"></p>
+  </div>
+</div>
+<script>
+function showNotes(txt) {
+  document.getElementById('notesText').textContent = txt;
+  document.getElementById('notesModal').style.display = 'flex';
+}
+</script>
+{% endblock %}

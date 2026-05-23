@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Nouvelle ordonnance{% endblock %}
+{% block content %}
+<p class="page-title">✍️ Rédiger une ordonnance</p>
+<p class="page-sub">Prescrivez des médicaments à vos patients.</p>
+
+<div style="max-width:580px">
+  <div class="card">
+    <form method="POST">
+      <div class="form-group">
+        <label>Patient *</label>
+        <select name="patient_id" required>
+          <option value="">Sélectionner un patient</option>
+          {% for p in patients %}
+          <option value="{{ p.id }}">{{ p.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Médicament *</label>
+        <input type="text" name="medicament" placeholder="ex: Metformine 500mg" required list="med-list"/>
+        <datalist id="med-list">
+          <option value="Metformine 500mg"/><option value="Metformine 1000mg"/>
+          <option value="Amlodipine 5mg"/><option value="Amlodipine 10mg"/>
+          <option value="Ramipril 5mg"/><option value="Ramipril 10mg"/>
+          <option value="Atorvastatine 20mg"/><option value="Atorvastatine 40mg"/>
+          <option value="Oméprazole 20mg"/><option value="Paracétamol 1g"/>
+          <option value="Ibuprofène 400mg"/><option value="Amoxicilline 1g"/>
+          <option value="Vitamine D3 1000UI"/><option value="Vitamine D3 2000UI"/>
+          <option value="Lévothyroxine 50mcg"/><option value="Bisoprolol 5mg"/>
+          <option value="Furosémide 40mg"/><option value="Ventoline 100mcg"/>
+        </datalist>
+      </div>
+      <div class="form-group">
+        <label>Posologie</label>
+        <input type="text" name="posologie" placeholder="ex: 1 comprimé matin et soir"/>
+      </div>
+      <div class="form-group">
+        <label>Durée du traitement</label>
+        <select name="duree">
+          <option value="">Sélectionner</option>
+          <option value="7 jours">7 jours</option>
+          <option value="14 jours">14 jours</option>
+          <option value="30 jours">30 jours</option>
+          <option value="60 jours">60 jours</option>
+          <option value="90 jours">90 jours</option>
+          <option value="6 mois">6 mois</option>
+          <option value="1 an">1 an (traitement chronique)</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button type="submit" class="btn btn-primary">✅ Émettre l'ordonnance</button>
+        <a href="{{ url_for('ordonnances') }}" class="btn btn-outline">Annuler</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Mon profil{% endblock %}
+{% block content %}
+<p class="page-title">👤 Mon profil</p>
+<p class="page-sub">Gérez vos informations personnelles.</p>
+
+<div class="card-grid card-grid-2">
+  <!-- Formulaire -->
+  <div class="card">
+    <h3 style="font-size:15px;font-weight:800;color:var(--navy);margin-bottom:20px">✏️ Modifier mes informations</h3>
+    <form method="POST">
+      <div class="form-group">
+        <label>Nom complet</label>
+        <input type="text" name="name" value="{{ user.name }}" required/>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" value="{{ user.email }}" disabled style="background:var(--off);color:var(--grey)"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="form-group">
+          <label>Âge</label>
+          <input type="number" name="age" value="{{ user.age or '' }}" min="1" max="120"/>
+        </div>
+        <div class="form-group">
+          <label>Ville</label>
+          <input type="text" name="city" value="{{ user.city or '' }}" placeholder="Votre ville"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Téléphone</label>
+        <input type="tel" name="phone" value="{{ user.phone or '' }}" placeholder="06 XX XX XX XX"/>
+      </div>
+      <div class="form-group">
+        <label>Biographie {% if session.role=='doctor' %}(visible par les patients){% endif %}</label>
+        <textarea name="bio" placeholder="Parlez de vous…">{{ user.bio or '' }}</textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">💾 Sauvegarder</button>
+    </form>
+  </div>
+
+  <!-- Infos compte -->
+  <div>
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:20px">
+        <div class="avatar" style="background:{{ user.avatar_color }};width:80px;height:80px;font-size:26px">
+          {{ user.name[:2].upper() }}
+        </div>
+        <div style="text-align:center">
+          <p style="font-weight:800;font-size:18px;color:var(--navy)">{{ user.name }}</p>
+          <span class="badge {% if session.role=='doctor' %}badge-blue{% endif %}">{{ 'Médecin' if session.role=='doctor' else 'Patient' }}</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0">
+        {% for label, val in [
+          ('Email', user.email),
+          ('Rôle', 'Médecin' if session.role=='doctor' else 'Patient'),
+          ('Ville', user.city or '—'),
+          ('Téléphone', user.phone or '—'),
+          ('Membre depuis', user.created_at[:10] if user.created_at else '—')
+        ] %}
+        <div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--lgrey)">
+          <span style="color:var(--grey);font-size:13px">{{ label }}</span>
+          <span style="color:var(--navy);font-weight:600;font-size:13px">{{ val }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Changer mot de passe -->
+    <div class="card">
+      <h3 style="font-size:14px;font-weight:800;color:var(--navy);margin-bottom:14px">🔒 Sécurité</h3>
+      <p style="color:var(--grey);font-size:13px;margin-bottom:14px">Votre compte est sécurisé. Pour changer de mot de passe, déconnectez-vous et utilisez "Mot de passe oublié".</p>
+      <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">Déconnexion</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

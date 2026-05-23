@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord Médecin{% endblock %}
+{% block content %}
+<p class="page-title">Tableau de bord</p>
+<p class="page-sub">Bienvenue {{ session.name }} — {{ doc.specialite }}</p>
+
+<!-- KPIs -->
+<div class="card-grid card-grid-4" style="margin-bottom:22px">
+  <div class="stat-box stat-blue"><span style="font-size:24px">📅</span><div class="num">{{ stats.today }}</div><div class="lbl">Consultations aujourd'hui</div></div>
+  <div class="stat-box stat-teal"><span style="font-size:24px">📊</span><div class="num">{{ stats.total }}</div><div class="lbl">Total consultations</div></div>
+  <div class="stat-box stat-gold"><span style="font-size:24px">⭐</span><div class="num">{{ doc.note }}</div><div class="lbl">Note moyenne patients</div></div>
+  <div class="stat-box stat-navy"><span style="font-size:24px">📋</span><div class="num">{{ stats.ordos }}</div><div class="lbl">Ordonnances en attente</div></div>
+</div>
+
+<!-- File patients + Ordonnances à valider -->
+<div class="card-grid card-grid-2" style="margin-bottom:22px">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <h3 style="font-size:15px;font-weight:800;color:var(--navy)">📋 File d'attente du jour</h3>
+      <a href="{{ url_for('consultations') }}" class="btn btn-outline btn-sm">Tout voir</a>
+    </div>
+    {% if patients_today %}
+    <div style="display:flex;flex-direction:column;gap:10px">
+      {% for p in patients_today %}
+      <div style="display:flex;align-items:center;gap:14px;background:var(--off);border-radius:12px;padding:12px 16px">
+        <div class="avatar" style="background:var(--blue);width:42px;height:42px;font-size:14px">{{ p.patient_name[:2].upper() }}</div>
+        <div style="flex:1">
+          <p style="font-weight:700;color:var(--navy);font-size:14px">{{ p.patient_name }}</p>
+          <p style="color:var(--grey);font-size:12px">{{ p.patient_age }} ans · {{ p.motif }}</p>
+        </div>
+        <span style="color:var(--teal);font-weight:700;font-size:13px">{{ p.date_rdv[-5:] if p.date_rdv else '—' }}</span>
+        <a href="{{ url_for('teleconsult', consult_id=p.id) }}" class="btn btn-primary btn-sm">▶ Démarrer</a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--grey);text-align:center;padding:30px;font-size:14px">Aucun patient prévu aujourd'hui.</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <h3 style="font-size:15px;font-weight:800;color:var(--navy)">✍️ Ordonnances à valider</h3>
+      <a href="{{ url_for('ordonnances') }}" class="btn btn-outline btn-sm">Voir tout</a>
+    </div>
+    {% if ordos_pending %}
+    <div style="display:flex;flex-direction:column;gap:10px">
+      {% for o in ordos_pending %}
+      <div style="background:var(--off);border-radius:12px;padding:12px 16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <p style="font-weight:700;color:var(--navy);font-size:13px">💊 {{ o.medicament }}</p>
+          <span class="badge">{{ o.patient_name }}</span>
+        </div>
+        <p style="color:var(--grey);font-size:12px;margin-bottom:10px">{{ o.posologie }}</p>
+        <div style="display:flex;gap:8px">
+          <button onclick="updateOrdo({{ o.id }},'livre')" class="btn btn-primary btn-sm">✓ Valider</button>
+          <button onclick="updateOrdo({{ o.id }},'annule')" class="btn btn-sm btn-red">✕</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--grey);text-align:center;padding:30px;font-size:14px">Aucune ordonnance en attente.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Actions rapides -->
+<div class="card-grid card-grid-3">
+  <a href="{{ url_for('new_ordonnance') }}" class="card" style="border-top:3px solid var(--teal);display:block;cursor:pointer">
+    <div style="font-size:28px;margin-bottom:10px">✍️</div>
+    <p style="font-weight:800;color:var(--navy);font-size:14px">Nouvelle ordonnance</p>
+    <p style="color:var(--grey);font-size:12px;margin-top:4px">Prescrire des médicaments</p>
+  </a>
+  <a href="{{ url_for('messages') }}" class="card" style="border-top:3px solid var(--blue);display:block;cursor:pointer">
+    <div style="font-size:28px;margin-bottom:10px">💬</div>
+    <p style="font-weight:800;color:var(--navy);font-size:14px">Messages patients</p>
+    <p style="color:var(--grey);font-size:12px;margin-top:4px">Répondre aux questions</p>
+  </a>
+  <a href="{{ url_for('profile') }}" class="card" style="border-top:3px solid var(--green);display:block;cursor:pointer">
+    <div style="font-size:28px;margin-bottom:10px">👤</div>
+    <p style="font-weight:800;color:var(--navy);font-size:14px">Mon profil</p>
+    <p style="color:var(--grey);font-size:12px;margin-top:4px">Gérer mes informations</p>
+  </a>
+</div>
+<script>
+function updateOrdo(id, status) {
+  fetch(`/api/ordonnance/${id}/status`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({status})
+  }).then(()=>location.reload());
+}
+</script>
+{% endblock %}

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>{% block title %}MediRural{% endblock %} — Santé sans frontières</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300;1,9..144,300&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --navy:#0D2B55;--blue:#1565C0;--teal:#0097A7;--teal-lt:#E0F7FA;
+  --green:#2E7D32;--green-lt:#E8F5E9;--gold:#F9A825;--red:#C62828;
+  --red-lt:#FFEBEE;--white:#fff;--off:#F4F8FB;--lgrey:#ECEFF1;
+  --grey:#546E7A;--dark:#0A1628;--radius:14px;
+  --shadow:0 2px 20px rgba(13,43,85,.10);
+  --font:'Sora',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--off);color:var(--navy);min-height:100vh;display:flex;flex-direction:column;}
+a{color:inherit;text-decoration:none;}
+
+/* ── NAV ── */
+.topbar{
+  background:var(--white);border-bottom:1.5px solid var(--lgrey);
+  padding:0 32px;height:62px;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:200;
+  box-shadow:0 1px 10px rgba(13,43,85,.06);
+}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-size:24px;color:var(--navy);}
+.logo-icon{width:38px;height:38px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.nav-links{display:flex;gap:4px;align-items:center;}
+.nav-links a{padding:8px 14px;border-radius:10px;font-size:14px;font-weight:500;color:var(--grey);transition:.15s;}
+.nav-links a:hover,.nav-links a.active{background:var(--teal-lt);color:var(--teal);}
+.nav-right{display:flex;align-items:center;gap:12px;}
+.avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;flex-shrink:0;}
+.badge{background:var(--teal-lt);color:var(--teal);border-radius:20px;padding:3px 11px;font-size:11px;font-weight:600;border:1px solid rgba(0,151,167,.2);}
+.badge-blue{background:#E3F2FD;color:var(--blue);}
+.badge-green{background:var(--green-lt);color:var(--green);}
+.badge-gold{background:#FFF8E1;color:var(--gold);}
+.badge-red{background:var(--red-lt);color:var(--red);}
+
+/* ── LAYOUT ── */
+.layout{display:flex;flex:1;}
+.sidebar{
+  width:230px;background:var(--white);border-right:1.5px solid var(--lgrey);
+  padding:22px 12px;display:flex;flex-direction:column;gap:3px;
+  position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto;
+}
+.sidebar a{
+  display:flex;align-items:center;gap:11px;padding:11px 14px;
+  border-radius:12px;font-size:14px;font-weight:500;color:var(--grey);
+  transition:.15s;border-left:3px solid transparent;
+}
+.sidebar a:hover{background:var(--off);color:var(--navy);}
+.sidebar a.active{background:var(--teal-lt);color:var(--teal);font-weight:700;border-left-color:var(--teal);}
+.sidebar .icon{font-size:18px;width:22px;text-align:center;}
+.sidebar-bottom{margin-top:auto;padding-top:16px;}
+.urgence-box{background:var(--red-lt);border:1px solid rgba(198,40,40,.2);border-radius:12px;padding:14px 16px;}
+.urgence-box h4{color:var(--red);font-size:12px;margin-bottom:4px;}
+.urgence-box a{color:var(--red);font-size:28px;font-weight:800;}
+
+/* ── MAIN ── */
+.main{flex:1;padding:30px 36px;max-width:1100px;}
+.page-title{font-size:24px;font-weight:800;color:var(--navy);margin-bottom:6px;}
+.page-sub{color:var(--grey);font-size:14px;margin-bottom:26px;}
+
+/* ── CARDS ── */
+.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--lgrey);padding:22px 24px;}
+.card:hover{box-shadow:0 6px 32px rgba(13,43,85,.13);}
+.card-grid{display:grid;gap:18px;}
+.card-grid-2{grid-template-columns:1fr 1fr;}
+.card-grid-3{grid-template-columns:repeat(3,1fr);}
+.card-grid-4{grid-template-columns:repeat(4,1fr);}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;border-radius:10px;font-family:var(--font);font-weight:700;font-size:14px;cursor:pointer;transition:.15s;border:2px solid transparent;}
+.btn-primary{background:var(--teal);color:#fff;border-color:var(--teal);}
+.btn-primary:hover{background:#00838F;}
+.btn-blue{background:var(--blue);color:#fff;border-color:var(--blue);}
+.btn-outline{background:transparent;color:var(--teal);border-color:var(--teal);}
+.btn-outline:hover{background:var(--teal-lt);}
+.btn-red{background:var(--red);color:#fff;border-color:var(--red);}
+.btn-sm{padding:7px 16px;font-size:12px;}
+.btn-gold{background:var(--gold);color:var(--dark);border-color:var(--gold);}
+
+/* ── FORMS ── */
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.form-group label{font-size:13px;font-weight:600;color:var(--navy);}
+.form-group input,.form-group select,.form-group textarea{
+  padding:11px 14px;border:2px solid var(--lgrey);border-radius:10px;
+  font-family:var(--font);font-size:14px;color:var(--navy);
+  outline:none;transition:border-color .15s;background:var(--white);
+}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--teal);}
+.form-group textarea{resize:vertical;min-height:80px;}
+
+/* ── TABLES ── */
+table{width:100%;border-collapse:collapse;}
+th{background:var(--off);padding:12px 16px;text-align:left;font-size:12px;font-weight:600;color:var(--grey);text-transform:uppercase;letter-spacing:.5px;}
+td{padding:13px 16px;border-bottom:1px solid var(--lgrey);font-size:14px;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#fafcff;}
+
+/* ── ALERTS ── */
+.alert{padding:12px 18px;border-radius:10px;font-size:14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.alert-success{background:var(--green-lt);color:var(--green);border:1px solid rgba(46,125,50,.2);}
+.alert-error{background:var(--red-lt);color:var(--red);border:1px solid rgba(198,40,40,.2);}
+.alert-info{background:var(--teal-lt);color:var(--teal);border:1px solid rgba(0,151,167,.2);}
+
+/* ── STATUS ── */
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;}
+.s-livre{color:var(--green)}.s-livre .status-dot{background:var(--green);}
+.s-en_cours,.s-planifiee{color:var(--gold)}.s-en_cours .status-dot,.s-planifiee .status-dot{background:var(--gold);}
+.s-prepare{color:var(--blue)}.s-prepare .status-dot{background:var(--blue);}
+.s-terminee{color:var(--grey)}.s-terminee .status-dot{background:var(--grey);}
+.s-en_attente{color:var(--red)}.s-en_attente .status-dot{background:var(--red);}
+
+/* ── STATS ── */
+.stat-box{border-radius:var(--radius);padding:20px 22px;display:flex;flex-direction:column;gap:4px;}
+.stat-box .num{font-size:32px;font-weight:800;line-height:1;}
+.stat-box .lbl{font-size:11px;font-weight:500;opacity:.8;}
+.stat-blue{background:var(--blue);color:#fff;}
+.stat-teal{background:var(--teal);color:#fff;}
+.stat-green{background:var(--green);color:#fff;}
+.stat-navy{background:var(--navy);color:#fff;}
+.stat-gold{background:var(--gold);color:var(--dark);}
+
+/* ── ANIM ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.main>*{animation:fadeUp .35s ease;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{animation:spin 1s linear infinite;display:inline-block;}
+
+/* ── SCROLL ── */
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,151,167,.25);border-radius:3px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sidebar{display:none;}
+  .main{padding:18px;}
+  .card-grid-2,.card-grid-3,.card-grid-4{grid-template-columns:1fr;}
+}
+</style>
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+<!-- TOPBAR -->
+<nav class="topbar">
+  <a href="{{ url_for('dashboard') }}" class="logo">
+    <div class="logo-icon">🏥</div>
+    MediRural
+  </a>
+  {% if session.user_id %}
+  <div class="nav-links">
+    <a href="{{ url_for('dashboard') }}" {% if request.endpoint=='dashboard' %}class="active"{% endif %}>Accueil</a>
+    {% if session.role=='patient' %}
+    <a href="{{ url_for('doctors') }}" {% if request.endpoint=='doctors' %}class="active"{% endif %}>Médecins</a>
+    <a href="{{ url_for('assistant') }}" {% if request.endpoint=='assistant' %}class="active"{% endif %}>Assistant IA</a>
+    {% endif %}
+    <a href="{{ url_for('consultations') }}" {% if request.endpoint=='consultations' %}class="active"{% endif %}>Consultations</a>
+    <a href="{{ url_for('ordonnances') }}" {% if request.endpoint=='ordonnances' %}class="active"{% endif %}>Ordonnances</a>
+    <a href="{{ url_for('messages') }}" {% if request.endpoint=='messages' %}class="active"{% endif %}>Messages</a>
+  </div>
+  <div class="nav-right">
+    <div class="avatar" style="background:{{ session.avatar_color }}">{{ session.name[:2].upper() }}</div>
+    <span class="badge {% if session.role=='doctor' %}badge-blue{% endif %}">{{ 'Médecin' if session.role=='doctor' else 'Patient' }}</span>
+    <a href="{{ url_for('profile') }}" class="btn btn-outline btn-sm">Profil</a>
+    <a href="{{ url_for('logout') }}" class="btn btn-sm" style="color:var(--grey)">Déconnexion</a>
+  </div>
+  {% endif %}
+</nav>
+
+{% if session.user_id %}
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    {% if session.role == 'patient' %}
+    <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint=='dashboard' }}"><span class="icon">🏠</span> Accueil</a>
+    <a href="{{ url_for('doctors') }}"   class="{{ 'active' if request.endpoint in ['doctors','doctor_detail'] }}"><span class="icon">🩺</span> Trouver un médecin</a>
+    <a href="{{ url_for('assistant') }}" class="{{ 'active' if request.endpoint=='assistant' }}"><span class="icon">🤖</span> Assistant IA</a>
+    <a href="{{ url_for('consultations') }}" class="{{ 'active' if request.endpoint=='consultations' }}"><span class="icon">📅</span> Mes consultations</a>
+    <a href="{{ url_for('ordonnances') }}" class="{{ 'active' if request.endpoint=='ordonnances' }}"><span class="icon">💊</span> Ordonnances</a>
+    <a href="{{ url_for('constantes') }}" class="{{ 'active' if request.endpoint=='constantes' }}"><span class="icon">📊</span> Mes constantes</a>
+    <a href="{{ url_for('messages') }}" class="{{ 'active' if request.endpoint=='messages' }}"><span class="icon">💬</span> Messages</a>
+    <a href="{{ url_for('profile') }}"  class="{{ 'active' if request.endpoint=='profile' }}"><span class="icon">👤</span> Mon profil</a>
+    {% else %}
+    <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint=='dashboard' }}"><span class="icon">🏠</span> Tableau de bord</a>
+    <a href="{{ url_for('consultations') }}" class="{{ 'active' if request.endpoint=='consultations' }}"><span class="icon">📅</span> Consultations</a>
+    <a href="{{ url_for('ordonnances') }}" class="{{ 'active' if request.endpoint=='ordonnances' }}"><span class="icon">📋</span> Ordonnances</a>
+    <a href="{{ url_for('new_ordonnance') }}" class="{{ 'active' if request.endpoint=='new_ordonnance' }}"><span class="icon">✍️</span> Nouvelle ordonnance</a>
+    <a href="{{ url_for('messages') }}" class="{{ 'active' if request.endpoint=='messages' }}"><span class="icon">💬</span> Messages</a>
+    <a href="{{ url_for('profile') }}"  class="{{ 'active' if request.endpoint=='profile' }}"><span class="icon">👤</span> Mon profil</a>
+    {% endif %}
+    <div class="sidebar-bottom">
+      <div class="urgence-box">
+        <h4>🚨 Urgence médicale</h4>
+        <p style="font-size:11px;color:var(--grey);margin:3px 0 8px">SAMU · disponible 24h/24</p>
+        <a href="tel:15">15</a>
+      </div>
+    </div>
+  </aside>
+  <!-- MAIN -->
+  <main class="main">
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in msgs %}
+        <div class="alert alert-{{ 'success' if cat=='success' else 'error' if cat=='error' else 'info' }}">
+          {{ '✅' if cat=='success' else '❌' if cat=='error' else 'ℹ️' }} {{ msg }}
+        </div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% else %}
+{% block public_content %}{% endblock %}
+{% endif %}
+
+<script>
+// Fermeture automatique des alertes
+document.querySelectorAll('.alert').forEach(a => setTimeout(()=>a.style.opacity='0',4000));
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

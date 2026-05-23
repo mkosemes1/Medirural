@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord{% endblock %}
+{% block content %}
+<p class="page-title">Bonjour {{ session.name.split()[0] }} 👋</p>
+<p class="page-sub">Voici un aperçu de votre état de santé et de vos prochains rendez-vous.</p>
+
+<!-- Bienvenue + prochain RDV -->
+<div class="card-grid card-grid-2" style="margin-bottom:20px">
+  <!-- Carte profil -->
+  <div class="card" style="background:linear-gradient(135deg,#0D2B55,#1565C0);border:none">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px">
+      <div class="avatar" style="background:{{ session.avatar_color }};width:56px;height:56px;font-size:18px">
+        {{ session.name[:2].upper() }}
+      </div>
+      <div>
+        <p style="color:rgba(255,255,255,.6);font-size:12px">Espace patient</p>
+        <p style="color:#fff;font-weight:800;font-size:20px">{{ user.name }}</p>
+        <p style="color:rgba(255,255,255,.6);font-size:12px">{{ user.age }} ans{% if user.city %} · {{ user.city }}{% endif %}</p>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:12px 16px">
+      <p style="color:rgba(255,255,255,.7);font-size:11px;margin-bottom:2px">Dernière connexion</p>
+      <p style="color:#fff;font-weight:600;font-size:14px">Aujourd'hui</p>
+    </div>
+  </div>
+  <!-- Prochain RDV -->
+  {% if prochain %}
+  <div class="card" style="border:2px solid rgba(0,151,167,.25)">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+      <div>
+        <p style="color:var(--grey);font-size:12px;margin-bottom:4px">Prochain rendez-vous</p>
+        <p style="color:var(--navy);font-weight:800;font-size:16px">{{ prochain.doc_name }}</p>
+        <p style="color:var(--teal);font-size:13px;margin-top:3px">{{ prochain.specialite }}</p>
+        <p style="color:var(--grey);font-size:12px;margin-top:6px">📅 {{ prochain.date_rdv }}</p>
+        <p style="color:var(--navy);font-size:13px;margin-top:4px;font-weight:500">{{ prochain.motif }}</p>
+      </div>
+      <span style="font-size:36px">📅</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <a href="{{ url_for('teleconsult', consult_id=prochain.id) }}" class="btn btn-primary btn-sm">📹 Rejoindre</a>
+      <a href="{{ url_for('consultations') }}" class="btn btn-outline btn-sm">Voir tout</a>
+    </div>
+  </div>
+  {% else %}
+  <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border:2px dashed var(--lgrey)">
+    <span style="font-size:40px">🩺</span>
+    <p style="color:var(--grey);text-align:center;font-size:14px">Aucun rendez-vous planifié.<br/>Prenez un RDV maintenant !</p>
+    <a href="{{ url_for('doctors') }}" class="btn btn-primary btn-sm">Consulter un médecin</a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Constantes vitales -->
+{% if constante %}
+<p style="font-weight:800;font-size:15px;color:var(--navy);margin-bottom:12px">📊 Mes dernières constantes</p>
+<div class="card-grid card-grid-4" style="margin-bottom:20px">
+  {% for item in [
+    ('❤️','Tension',    constante.tension,    'mmHg'),
+    ('🩸','Glycémie',   constante.glycemie,   'mmol/L'),
+    ('⚖️','Poids',      constante.poids|string if constante.poids else '—', 'kg'),
+    ('🌡️','Température', constante.temperature|string if constante.temperature else '—', '°C')
+  ] %}
+  <div class="card" style="text-align:center;padding:18px 12px">
+    <div style="font-size:26px;margin-bottom:8px">{{ item[0] }}</div>
+    <p style="font-size:20px;font-weight:800;color:var(--navy)">{{ item[2] or '—' }}</p>
+    <p style="color:var(--grey);font-size:11px;margin-top:3px">{{ item[1] }}</p>
+    <span class="badge badge-green" style="margin-top:6px;display:inline-block">Normal</span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Consultations récentes + Ordonnances -->
+<div class="card-grid card-grid-2" style="margin-bottom:20px">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-size:15px;font-weight:800;color:var(--navy)">📅 Consultations récentes</h3>
+      <a href="{{ url_for('consultations') }}" class="btn btn-outline btn-sm">Voir tout</a>
+    </div>
+    {% if consults %}
+    <table>
+      <thead><tr><th>Médecin</th><th>Motif</th><th>Statut</th></tr></thead>
+      <tbody>
+        {% for c in consults[:4] %}
+        <tr>
+          <td><strong>{{ c.doc_name }}</strong><br><small style="color:var(--grey)">{{ c.specialite }}</small></td>
+          <td style="font-size:13px">{{ c.motif }}</td>
+          <td><span class="s-{{ c.status }}"><span class="status-dot"></span>{{ c.status|replace('_',' ')|title }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="color:var(--grey);text-align:center;padding:20px;font-size:14px">Aucune consultation pour le moment.</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-size:15px;font-weight:800;color:var(--navy)">💊 Mes ordonnances</h3>
+      <a href="{{ url_for('ordonnances') }}" class="btn btn-outline btn-sm">Voir tout</a>
+    </div>
+    {% if ordos %}
+    <div style="display:flex;flex-direction:column;gap:10px">
+      {% for o in ordos %}
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--off);border-radius:10px;padding:12px 14px">
+        <div>
+          <p style="font-weight:700;color:var(--navy);font-size:13px">💊 {{ o.medicament }}</p>
+          <p style="color:var(--grey);font-size:11px;margin-top:2px">{{ o.posologie }} · {{ o.doc_name }}</p>
+        </div>
+        <span class="s-{{ o.status }}"><span class="status-dot"></span>{{ o.status|replace('_',' ')|title }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--grey);text-align:center;padding:20px;font-size:14px">Aucune ordonnance.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Accès rapide -->
+<p style="font-weight:800;font-size:15px;color:var(--navy);margin-bottom:12px">⚡ Accès rapide</p>
+<div class="card-grid card-grid-3">
+  <a href="{{ url_for('doctors') }}" class="card" style="border-top:3px solid var(--teal);cursor:pointer;display:block">
+    <div style="font-size:30px;margin-bottom:10px">📹</div>
+    <p style="font-weight:800;color:var(--navy);font-size:14px">Nouvelle consultation</p>
+    <p style="color:var(--grey);font-size:12px;margin-top:4px">Consultez un médecin maintenant</p>
+  </a>
+  <a href="{{ url_for('assistant') }}" class="card" style="border-top:3px solid var(--blue);cursor:pointer;display:block">
+    <div style="font-size:30px;margin-bottom:10px">🤖</div>
+    <p style="font-weight:800;color:var(--navy);font-size:14px">Assistant IA</p>
+    <p style="color:var(--grey);font-size:12px;margin-top:4px">Analysez vos symptômes</p>
+  </a>
+  <a href="{{ url_for('constantes') }}" class="card" style="border-top:3px solid var(--green);cursor:pointer;display:block">
+    <div style="font-size:30px;margin-bottom:10px">📊</div>
+    <p style="font-weight:800;color:var(--navy);font-size:14px">Mes constantes</p>
+    <p style="color:var(--grey);font-size:12px;margin-top:4px">Saisir et suivre mes mesures</p>
+  </a>
+</div>
+{% endblock %}

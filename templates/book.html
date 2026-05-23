@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Prendre un rendez-vous{% endblock %}
+{% block content %}
+<p class="page-title">📅 Prendre un rendez-vous</p>
+<div style="max-width:540px">
+  <!-- Médecin choisi -->
+  <div class="card" style="margin-bottom:22px;display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,var(--teal),var(--blue));border:none">
+    <div class="avatar" style="background:{{ doc.avatar_color }};width:52px;height:52px">{{ doc.name[:2].upper() }}</div>
+    <div>
+      <p style="color:#fff;font-weight:800;font-size:16px">{{ doc.name }}</p>
+      <p style="color:rgba(255,255,255,.75);font-size:13px">{{ doc.specialite }} · ⭐ {{ doc.note }}</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3 style="font-size:16px;font-weight:800;color:var(--navy);margin-bottom:20px">Détails du rendez-vous</h3>
+    <form method="POST">
+      <div class="form-group">
+        <label>Motif de la consultation *</label>
+        <select name="motif" required>
+          <option value="">Choisir un motif</option>
+          <option>Consultation générale</option>
+          <option>Suivi de traitement</option>
+          <option>Renouvellement d'ordonnance</option>
+          <option>Douleurs / symptômes aigus</option>
+          <option>Bilan de santé</option>
+          <option>Suivi maladie chronique</option>
+          <option>Avis médical / second avis</option>
+          <option>Autre</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Date et heure souhaitée *</label>
+        <input type="datetime-local" name="date_rdv" required
+               min="{{ now }}"
+               value="{{ default_date }}"/>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button type="submit" class="btn btn-primary">✅ Confirmer le RDV</button>
+        <a href="{{ url_for('doctors') }}" class="btn btn-outline">Annuler</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
